@@ -1,6 +1,6 @@
 # blender-keyframe-manipulation-tools
 
-An add-on for Blender with handy tools for working with keyframes.
+Some handy tools for working with keyframes in Blender. Inspired by Alan Camilo's animBot.
 
 ## Limitations
 
@@ -14,7 +14,7 @@ It does not work in Blender 2.8 yet. The 2.8 API is still unstable. We're develo
 
 ## Functions
 
-This add-on currently adds the following operators. You can get to them via Space Bar search. (Again, 2.8 is not supported yet.)
+This add-on currently adds the following operators. You can get to them through Space Bar search or by pressing Shift Z in the Graph Editor. (Again, 2.8 is not supported yet.)
 
 ### Graph Editor
 
@@ -32,8 +32,22 @@ All of these should work with multiple bone channels. They do not work on object
 
 ## Roadmap
 
-* Some kind of pie menu or keymap.
-* Add: Smooth Rough tool from animBot (will be called Dampen/Excite)
-* Make existing tools work with object-level animation
-* More to follow...
-* Work on Blender 2.8 compatibility once 2.8 API is declared stable. 
+These are the current priorities as of version 0.0.4
+
+### Additions
+
+* Smooth Rough tool from animBot (will be called Dampen/Excite)
+
+### Fixes
+
+* All: Make existing tools work with object-level animation, not just bones
+* Ease: Do something more helpful with out-of-bounds keys 
+
+Work on Blender 2.8 compatibility will begin after 2.8 API is declared stable by the Blender devs. 
+
+## Acknowledgements
+
+Thanks to
+
+* Luciano "Looch" Muñoz for guidance and encouragment 
+* Alan Camilo for inspiring us with animBot

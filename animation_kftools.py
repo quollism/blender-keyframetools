@@ -17,9 +17,9 @@
 # ##### END GPL LICENSE BLOCK #####
 
 bl_info = {
-    "name": "Keyframe Manipulation Tools",
+    "name": "Keyframe Tools",
     "author": "quollism",
-    "version": (0, 4),
+    "version": (0, 0, 4),
     "blender": (2, 79, 0),
     "description": "Some helpful tools for working with keyframes. Inspired by Alan Camilo's animBot toolset.",
     "warning": "Pre-release software. Only armature animation is supported so far. Working on it!",
@@ -31,22 +31,10 @@ from copy import deepcopy
 from mathutils import Vector
 from bpy.props import FloatVectorProperty
 
-class keytools_FlattenKeys(bpy.types.Operator):
-    """Converges keys and handles to a linear fit between the first and last keyframe of the selection"""
-    bl_idname = "graph.flatten_keys"
-    bl_label = "Flatten Keyframes"
+addon_keymaps = []
 
-    def execute(self, context):
-        curve_datas = keytools_getSelectedKeysAndExtents()
-        for curve_data in curve_datas:
-            slopeMaker = keytools_slopeMaker(curve_data[1], curve_data[2])
-            for i, keyframe in enumerate(curve_data[0]):
-                keyframe.co[1] = slopeMaker.linear_fit(keyframe.co[0])
-                keyframe.handle_left[1] = slopeMaker.linear_fit(keyframe.handle_left[0])
-                keyframe.handle_right[1] = slopeMaker.linear_fit(keyframe.handle_right[0])
-        return { 'FINISHED' }
-
-def keytools_getSelectedKeysAndExtents():
+def kftools_getSelectedKeysAndExtents():
+    print("Getting selected keys and extents")
     curve_datas = []
     bone_names = [b.name for b in bpy.context.selected_pose_bones]
     fcurves = bpy.context.active_object.animation_data.action.fcurves
@@ -73,7 +61,23 @@ def keytools_getSelectedKeysAndExtents():
                 curve_datas.append([keyframes_referenced, first_co, last_co, keyframes_data])
     return curve_datas
 
-class keytools_slopeMaker():
+class GRAPH_OT_flatten_keyframes(bpy.types.Operator):
+    """Converges keys and handles to a linear fit between the first and last keyframe of the selection"""
+    bl_idname = "graph.flatten_keyframes"
+    bl_label = "Flatten Keyframes"
+    add_to_menu = True
+
+    def execute(self, context):
+        curve_datas = kftools_getSelectedKeysAndExtents()
+        for curve_data in curve_datas:
+            slopeMaker = kftools_slopeMaker(curve_data[1], curve_data[2])
+            for i, keyframe in enumerate(curve_data[0]):
+                keyframe.co[1] = slopeMaker.linear_fit(keyframe.co[0])
+                keyframe.handle_left[1] = slopeMaker.linear_fit(keyframe.handle_left[0])
+                keyframe.handle_right[1] = slopeMaker.linear_fit(keyframe.handle_right[0])
+        return { 'FINISHED' }
+
+class kftools_slopeMaker():
     def __init__(self, first_co, last_co):
         self.start_frame = first_co[0]
         self.start_value = first_co[1]
@@ -114,20 +118,25 @@ class keytools_slopeMaker():
         final_value = self.start_value + (position * self.height)
         return final_value        
 
-class keytools_EaseKeys(bpy.types.Operator):
+class GRAPH_OT_ease_keyframes(bpy.types.Operator):
     """Puts keys and handles along an eased curve between the first and last keyframe of the selection"""
-    bl_idname = "graph.ease_key_selection"
+    bl_idname = "graph.ease_keyframes"
     bl_label = "Ease Keyframes"
+    add_to_menu = True
 
     offset = FloatVectorProperty( name="Offset", size=3 )
 
     def execute(self, context):
         factor = self.offset[0]
         for curve_data in self._curve_datas:
-            slopeMaker = keytools_slopeMaker(curve_data[1], curve_data[2])
+            slopeMaker = kftools_slopeMaker(curve_data[1], curve_data[2])
             for i, keyframe in enumerate(curve_data[0]):
                 keyframe.co[1] = slopeMaker.ease(keyframe.co[0], factor, curve_data[3][i]['co'][1])
+                keyframe.handle_left[0] = keyframe.co[0] - 2
+                keyframe.handle_left_type = 'FREE'
                 keyframe.handle_left[1] = slopeMaker.ease(keyframe.handle_left[0], factor, curve_data[3][i]['handle_left'][1])
+                keyframe.handle_right[0] = keyframe.co[0] + 2
+                keyframe.handle_right_type = 'FREE'
                 keyframe.handle_right[1] = slopeMaker.ease(keyframe.handle_right[0], factor, curve_data[3][i]['handle_right'][1])
 
     def modal(self, context, event):
@@ -152,25 +161,27 @@ class keytools_EaseKeys(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
+        print(context)
         if context.space_data.type == 'GRAPH_EDITOR':
             self._initial_mouse = Vector((event.mouse_x, event.mouse_y, 0.0)) 
-            self._curve_datas = keytools_getSelectedKeysAndExtents()
+            self._curve_datas = kftools_getSelectedKeysAndExtents()
             context.window_manager.modal_handler_add(self)
             return {'RUNNING_MODAL'}
         else:
             self.report({'WARNING'}, "Active space must be graph editor")
             return {'CANCELLED'}
 
-class keytools_FlattenExaggerateKeys(bpy.types.Operator):
+class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
     """Scales keys and handles to/from a linear fit between the first and last keyframe of the selection"""
-    bl_idname = "graph.flatten_exaggerate_key_selection"
+    bl_idname = "graph.flatten_exaggerate_keyframes"
     bl_label = "Flatten/Exaggerate Keyframes"
+    add_to_menu = True
 
     offset = FloatVectorProperty( name="Offset", size=3 )
 
     def execute(self, context):
         for curve_data in self._curve_datas:
-            slopeMaker = keytools_slopeMaker(curve_data[1], curve_data[2])
+            slopeMaker = kftools_slopeMaker(curve_data[1], curve_data[2])
             shifted_offset = self.offset[0] + 1
             for i, keyframe in enumerate(curve_data[0]):
                 keyframe.co[1] = slopeMaker.flatten_exaggerate(
@@ -204,7 +215,7 @@ class keytools_FlattenExaggerateKeys(bpy.types.Operator):
     def invoke(self, context, event):
         if context.space_data.type == 'GRAPH_EDITOR':
             self._initial_mouse = Vector((event.mouse_x, event.mouse_y, 0.0)) 
-            self._curve_datas = keytools_getSelectedKeysAndExtents()
+            self._curve_datas = kftools_getSelectedKeysAndExtents()
             context.window_manager.modal_handler_add(self)
             return {'RUNNING_MODAL'}
         else:
@@ -212,10 +223,11 @@ class keytools_FlattenExaggerateKeys(bpy.types.Operator):
             return {'CANCELLED'}
 
 # BUGGY
-class keytools_ShareKeys(bpy.types.Operator):
+class kftools_ShareKeys(bpy.types.Operator):
     """Shares keys between visisble animation channels in dope sheet"""
-    bl_idname = "action.share_keys"
-    bl_label = "Share Keys"
+    bl_idname = "action.share_keyframes"
+    bl_label = "Share Keyframes"
+    add_to_menu = True
 
     def execute(self, context):
         # so the vague problem with this
@@ -241,10 +253,11 @@ class keytools_ShareKeys(bpy.types.Operator):
         context.scene.frame_current = start_frame
         return { 'FINISHED' }
 
-class keytools_PlaceCursorAndPivot(bpy.types.Operator):
+class GRAPH_OT_place_cursor_and_pivot(bpy.types.Operator):
     """Places 2D cursor at selection and sets pivot mode to 2D cursor"""
     bl_idname = "graph.place_cursor_and_pivot"
     bl_label = "Place Cursor and Pivot"
+    add_to_menu = True
 
     def execute(self, context):
         bpy.ops.graph.frame_jump()
@@ -253,28 +266,68 @@ class keytools_PlaceCursorAndPivot(bpy.types.Operator):
         bpy.ops.graph.select_all_toggle()
         return { 'FINISHED' }
 
-def keytools_dopesheet_extra_controls(self, context):
+def kftools_dopesheet_extra_controls(self, context):
     if context.space_data.mode in ('DOPESHEET', 'ACTION'):
         layout = self.layout
         layout.operator("action.share_keys", text="Share Keys")
 
+# class GRAPH_MT_kftools_menu(bpy.types.Menu):
+#     bl_label = "Keyframe Tools"
+#     # just graph editor for now
+#     bl_idname = "GRAPH_MT_kftools_menu"
+#     add_to_menu = False
+
+#     def draw(self, context):
+#         if context.space_data.type == 'GRAPH_EDITOR':
+#             layout = self.layout
+#             for c in classes:
+#                 if c.add_to_menu:
+#                     layout.operator(c.bl_idname)
+#         # else nothing            
+
+class GRAPH_PIE_kftools_piemenu(bpy.types.Menu):
+    # label is displayed at the center of the pie menu.
+    bl_label = "Keyframe Tools"
+    bl_idname = "GRAPH_PIE_kftools_piemenu"
+    add_to_menu = False
+
+    def draw(self, context):
+        if context.space_data.type == 'GRAPH_EDITOR':
+            layout = self.layout
+            pie = layout.menu_pie()
+            pie.operator("graph.place_cursor_and_pivot", icon='CURSOR', text="Set Cursor and Pivot")
+            pie.operator("graph.flatten_keyframes", icon='MAN_SCALE', text="Flatten Keys")
+            pie.operator("graph.flatten_exaggerate_keyframes", icon='MAN_SCALE', text="Flatten/Exaggerate Keys")
+            pie.operator("graph.ease_keyframes", icon='MAN_SCALE', text="Ease Keys")
+
+classes = (
+    # below operator is buggy mcbugbugs
+    # kftools_ShareKeys,
+    GRAPH_OT_flatten_keyframes,
+    GRAPH_OT_flatten_exaggerate_keyframes,
+    GRAPH_OT_ease_keyframes,
+    GRAPH_OT_place_cursor_and_pivot,
+    # GRAPH_MT_kftools_menu,
+    GRAPH_PIE_kftools_piemenu
+)
+
 def register():
-    bpy.utils.register_class(keytools_EaseKeys)
-    bpy.utils.register_class(keytools_FlattenKeys)
-    bpy.utils.register_class(keytools_FlattenExaggerateKeys)
-    bpy.utils.register_class(keytools_PlaceCursorAndPivot)
-    # buggy
-    # bpy.utils.register_class(keytools_ShareKeys)
-    # bpy.types.DOPESHEET_HT_header.append(keytools_dopesheet_extra_controls)
+    for c in classes:
+        bpy.utils.register_class(c)
+    # bpy.types.DOPESHEET_HT_header.append(kftools_dopesheet_extra_controls)
+    wm = bpy.context.window_manager
+    km = wm.keyconfigs.addon.keymaps.new(name='Graph Editor', space_type='GRAPH_EDITOR')
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'Z', 'PRESS', shift=True)
+    kmi.properties.name = 'GRAPH_PIE_kftools_piemenu'
+    addon_keymaps.append((km, kmi))
 
 def unregister():
-    # bpy.types.DOPESHEET_HT_header.remove(keytools_dopesheet_extra_controls)
-    # buggy
-    # bpy.utils.unregister_class(keytools_ShareKeys)
-    bpy.utils.unregister_class(keytools_PlaceCursorAndPivot)
-    bpy.utils.unregister_class(keytools_FlattenExaggerateKeys)
-    bpy.utils.unregister_class(keytools_FlattenKeys)
-    bpy.utils.unregister_class(keytools_EaseKeys)
+    for c in classes:
+        bpy.utils.unregister_class(c)
+    # bpy.types.DOPESHEET_HT_header.remove(kftools_dopesheet_extra_controls)
+    for km, kmi in addon_keymaps:
+        km.keymap_items.remove(kmi)
+        addon_keymaps.clear()
 
 if __name__ == "__main__":
     register()

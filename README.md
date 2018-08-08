@@ -1,4 +1,4 @@
-# blender-keyframe-manipulation-tools
+# blender-keyframetools
 
 Some handy tools for working with keyframes in Blender. Inspired by Alan Camilo's animBot.
 

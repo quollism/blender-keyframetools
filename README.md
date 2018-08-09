@@ -29,7 +29,7 @@ All of these should work with multiple bone channels. **They do not work on obje
 
 ## Roadmap
 
-These are the current priorities as of version 0.0.4
+These are the current priorities as of version 0.4.0 (9 August 2018)
 
 ### Coming Additions
 

@@ -19,7 +19,7 @@
 bl_info = {
     "name": "Keyframe Tools",
     "author": "quollism",
-    "version": (0, 4, 0),
+    "version": (0, 4, 1),
     "blender": (2, 79, 0),
     "description": "Some helpful tools for working with keyframes. Inspired by Alan Camilo's animBot toolset.",
     "warning": "Pre-release software. Only armature animation is supported so far. Working on it!",
@@ -34,11 +34,13 @@ from bpy.props import FloatVectorProperty
 addon_keymaps = []
 
 def get_selected_keys_and_extents():
-    print("Getting selected keys and extents")
     curve_datas = []
     bone_names = [b.name for b in bpy.context.selected_pose_bones]
     fcurves = bpy.context.active_object.animation_data.action.fcurves
     for curve in fcurves:
+        if curve.hide:
+            # priciple of least surprise, don't alter hidden curves
+            continue
         first_co = None
         points = None
         last_co = None

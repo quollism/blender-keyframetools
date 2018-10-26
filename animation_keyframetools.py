@@ -24,7 +24,7 @@ bl_info = {
     "description": "Some helpful tools for working with keyframes. Inspired by Alan Camilo's animBot toolset.",
     "warning": "Pre-release software. Only armature animation is supported so far. Working on it!",
     "category": "Animation"
-}
+    }
 
 import bpy
 from copy import deepcopy
@@ -58,7 +58,7 @@ def get_selected_keys_and_extents():
                         'co': deepcopy(keyframe.co),
                         'handle_left': deepcopy(keyframe.handle_left),
                         'handle_right': deepcopy(keyframe.handle_right)
-                    } ) # needs to be all three data points!
+                        } ) # needs to be all three data points!
             if last_co != None:
                 curve_datas.append([keyframes_referenced, first_co, last_co, keyframes_data])
     return curve_datas
@@ -156,7 +156,7 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
                 for i, keyframe in enumerate(curve_data[0]):
                     keyframe.co[1] = curve_data[3][i]['co'][1]
                     keyframe.handle_left[1] = curve_data[3][i]['handle_left'][1]
-                    keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]                
+                    keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]
             context.area.header_text_set()
             return {'CANCELLED'}
 
@@ -208,7 +208,7 @@ class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
                 for i, keyframe in enumerate(curve_data[0]):
                     keyframe.co[1] = curve_data[3][i]['co'][1]
                     keyframe.handle_left[1] = curve_data[3][i]['handle_left'][1]
-                    keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]                
+                    keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]
             context.area.header_text_set()
             return {'CANCELLED'}
 
@@ -285,7 +285,7 @@ def keyframetools_dopesheet_extra_controls(self, context):
 #             for c in classes:
 #                 if c.add_to_menu:
 #                     layout.operator(c.bl_idname)
-#         # else nothing            
+#         # else nothing
 
 class GRAPH_PIE_keyframetools_piemenu(bpy.types.Menu):
     # label is displayed at the center of the pie menu.
@@ -311,7 +311,7 @@ classes = (
     GRAPH_OT_place_cursor_and_pivot,
     # GRAPH_MT_keyframetools_menu,
     GRAPH_PIE_keyframetools_piemenu
-)
+    )
 
 def register():
     for c in classes:

@@ -90,7 +90,7 @@ def get_selected_keys_and_extents():
             fcurves.extend([(obj, fc) for fc in anim.action.fcurves])
 
     # Scan fcurves for keyframes
-    for curve in fcurves:
+    for obj, curve in fcurves:
         if curve.hide:
             continue
         first_co = None

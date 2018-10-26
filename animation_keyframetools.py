@@ -83,7 +83,6 @@ def get_selected_keys_and_extents():
                 if any((only_selected is False, obj.select, pbone in pbones,)):
                     add_bone(pbone)
 
-
     # Add fcurves from objects
     for obj in selected:
         anim = obj.animation_data
@@ -137,7 +136,7 @@ def get_selected_keys_and_extents():
                     'handle_right': deepcopy(keyframe.handle_right)
                 } ) # needs to be all three data points!
         if last_co != None:
-            curve_datas.append([keyframes_referenced, first_co, last_co, keyframes_data])
+            curve_datas.append([keyframes_referenced, first_co, last_co, keyframes_data, curve])
     return curve_datas
 
 class GRAPH_OT_flatten_keyframes(bpy.types.Operator):
@@ -214,10 +213,8 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
             for i, keyframe in enumerate(curve_data[0]):
                 keyframe.co[1] = slopeMaker.ease(keyframe.co[0], factor, curve_data[3][i]['co'][1])
                 keyframe.handle_left[0] = keyframe.co[0] - 2
-                keyframe.handle_left_type = 'FREE'
                 keyframe.handle_left[1] = slopeMaker.ease(keyframe.handle_left[0], factor, curve_data[3][i]['handle_left'][1])
                 keyframe.handle_right[0] = keyframe.co[0] + 2
-                keyframe.handle_right_type = 'FREE'
                 keyframe.handle_right[1] = slopeMaker.ease(keyframe.handle_right[0], factor, curve_data[3][i]['handle_right'][1])
 
     def modal(self, context, event):
@@ -227,6 +224,10 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
             context.area.header_text_set("Ease Factor %.4f" % (self.offset[0]))
 
         elif event.type == 'LEFTMOUSE':
+            for curve_data in self._curve_datas:
+                for i, keyframe in enumerate(curve_data[0]):
+                    keyframe.handle_left_type = 'FREE'
+                    keyframe.handle_right_type = 'FREE'
             context.area.header_text_set()
             return {'FINISHED'}
 
@@ -236,6 +237,7 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
                     keyframe.co[1] = curve_data[3][i]['co'][1]
                     keyframe.handle_left[1] = curve_data[3][i]['handle_left'][1]
                     keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]
+                curve_data[4].update()
             context.area.header_text_set()
             return {'CANCELLED'}
 
@@ -289,6 +291,7 @@ class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
                     keyframe.co[1] = curve_data[3][i]['co'][1]
                     keyframe.handle_left[1] = curve_data[3][i]['handle_left'][1]
                     keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]
+                curve_data[4].update()
             context.area.header_text_set()
             return {'CANCELLED'}
 

@@ -67,6 +67,7 @@ class GRAPH_OT_flatten_keyframes(bpy.types.Operator):
     """Converges keys and handles to a linear fit between the first and last keyframe of the selection"""
     bl_idname = "graph.flatten_keyframes"
     bl_label = "Flatten Keyframes"
+    bl_options = {'REGISTER', 'UNDO'}
     add_to_menu = True
 
     def execute(self, context):
@@ -124,6 +125,7 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
     """Puts keys and handles along an eased curve between the first and last keyframe of the selection"""
     bl_idname = "graph.ease_keyframes"
     bl_label = "Ease Keyframes"
+    bl_options = {'REGISTER', 'UNDO'}
     add_to_menu = True
 
     offset = FloatVectorProperty( name="Offset", size=3 )
@@ -177,6 +179,7 @@ class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
     """Scales keys and handles to/from a linear fit between the first and last keyframe of the selection"""
     bl_idname = "graph.flatten_exaggerate_keyframes"
     bl_label = "Flatten/Exaggerate Keyframes"
+    bl_options = {'REGISTER', 'UNDO'}
     add_to_menu = True
 
     offset = FloatVectorProperty( name="Offset", size=3 )
@@ -229,6 +232,7 @@ class keyframetools_ShareKeys(bpy.types.Operator):
     """Shares keys between visisble animation channels in dope sheet"""
     bl_idname = "action.share_keyframes"
     bl_label = "Share Keyframes"
+    bl_options = {'REGISTER', 'UNDO'}
     add_to_menu = True
 
     def execute(self, context):
@@ -259,6 +263,8 @@ class GRAPH_OT_place_cursor_and_pivot(bpy.types.Operator):
     """Places 2D cursor at selection and sets pivot mode to 2D cursor"""
     bl_idname = "graph.place_cursor_and_pivot"
     bl_label = "Place Cursor and Pivot"
+    bl_options = {'REGISTER', 'UNDO_GROUPED'}
+    # bl_undo_group = ""
     add_to_menu = True
 
     def execute(self, context):

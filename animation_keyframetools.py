@@ -19,7 +19,7 @@
 bl_info = {
     "name": "Keyframe Tools",
     "author": "quollism",
-    "version": (0, 4, 1),
+    "version": (0, 5, 0),
     "blender": (2, 79, 0),
     "description": "Some helpful tools for working with keyframes. Inspired by Alan Camilo's animBot toolset.",
     "warning": "Pre-release software. Only armature animation is supported so far. Working on it!",
@@ -413,6 +413,8 @@ def register():
     kmi = km.keymap_items.new('graph.flatten_exaggerate_keyframes', 'D', 'PRESS')
     addon_keymaps.append((km, kmi))
     kmi = km.keymap_items.new('graph.ease_keyframes', 'A', 'PRESS', shift=True)
+    addon_keymaps.append((km, kmi))
+    kmi = km.keymap_items.new('graph.place_cursor_and_pivot', 'G', 'PRESS', shift=True, ctrl=True)
     addon_keymaps.append((km, kmi))
 
 def unregister():

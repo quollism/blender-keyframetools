@@ -24,7 +24,7 @@ bl_info = {
     "description": "Some helpful tools for working with keyframes. Inspired by Alan Camilo's animBot toolset.",
     "warning": "Pre-release software. Only armature animation is supported so far. Working on it!",
     "category": "Animation"
-}
+    }
 
 import bpy
 from copy import deepcopy
@@ -34,39 +34,116 @@ from bpy.props import FloatVectorProperty
 addon_keymaps = []
 
 def get_selected_keys_and_extents():
+    context = bpy.context
+    pbones = []
+    pbones.append(context.selected_pose_bones)
     curve_datas = []
-    bone_names = [b.name for b in bpy.context.selected_pose_bones]
-    fcurves = bpy.context.active_object.animation_data.action.fcurves
-    for curve in fcurves:
+    selected = []
+    objects = []
+    bones = []
+    fcurves = []
+
+    try:
+        only_selected = context.space_data.dopesheet.show_only_selected
+        show_hidden = context.space_data.dopesheet.show_hidden
+    except:
+        only_selected = True
+        show_hidden = False
+
+    def add_obj(obj):
+        if show_hidden is False and obj.hide:
+            return None
+        if obj not in selected:
+            selected.append(obj)
+
+    def add_bone(b):
+        if only_selected and not b.bone.select:
+            return None
+        add_obj(b.id_data)
+        bones.append(b)
+
+    for obj in context.scene.objects:
+        if show_hidden is False and obj.hide:
+            continue
+
+        # Scan layers for object
+        o = None
+        for (index, l) in enumerate(context.scene.layers):
+            if (l and obj.layers[index]):
+                o = obj
+                break
+        if o is None:
+            continue
+
+        # Add object and bones
+        if bool(only_selected and obj.select == False) is False:
+            add_obj(obj)
+        if obj.pose is not None:
+            for (name, pbone) in obj.pose.bones.items():
+                if any((only_selected is False, obj.select, pbone in pbones,)):
+                    add_bone(pbone)
+
+    # Add fcurves from objects
+    for obj in selected:
+        anim = obj.animation_data
+        if anim and anim.action:
+            fcurves.extend([(obj, fc) for fc in anim.action.fcurves])
+
+    # Scan fcurves for keyframes
+    for obj, curve in fcurves:
         if curve.hide:
-            # priciple of least surprise, don't alter hidden curves
             continue
         first_co = None
         points = None
         last_co = None
-        if curve.data_path.split('"')[1] in bone_names:
-            keyframes_referenced = []
-            keyframes_data = []
-            for keyframe in curve.keyframe_points:
-                if keyframe.select_control_point:
-                    if first_co == None:
-                        first_co = keyframe.co
-                    else:
-                        last_co = keyframe.co
-                    keyframes_referenced.append(keyframe)
-                    keyframes_data.append( {
-                        'co': deepcopy(keyframe.co),
-                        'handle_left': deepcopy(keyframe.handle_left),
-                        'handle_right': deepcopy(keyframe.handle_right)
-                    } ) # needs to be all three data points!
-            if last_co != None:
-                curve_datas.append([keyframes_referenced, first_co, last_co, keyframes_data])
+        path = curve.data_path
+        
+        # Read path to get target's name
+        if (path.startswith('pose.bones')):
+            # btype =   'BONE'
+            # bpath =   path.split('"]', 1)[1]      ## Transforms and custom prop
+            # if (bpath.startswith('.')):       ## constraints?
+                # bpath =   bpath.split('.', 1)[1]
+            bname   =   (path.split('["', 1)[1].split('"]', 1)[0])
+            bone    =   obj.pose.bones.get(bname)
+        elif (path.startswith('bones')):    #data.bones
+            # btype =   'BONE'
+            # bpath =   path.split('"].', 1)[1]
+            bname   =   (path.split('["', 1)[1].split('"]', 1)[0])
+            bone    =   obj.bones.get(bname)
+        else:
+            # btype =   'OBJECT'
+            # bpath =   path
+            bname   =   obj.name
+            bone    =   obj
+        
+        if (bone is None and curve.is_valid is True) or (bone is not None and bone != obj and bone not in bones):
+            # Bone not selected
+            continue
+
+        keyframes_referenced = []
+        keyframes_data = []
+        for keyframe in curve.keyframe_points:
+            if keyframe.select_control_point:
+                if first_co == None:
+                    first_co = keyframe.co
+                else:
+                    last_co = keyframe.co
+                keyframes_referenced.append(keyframe)
+                keyframes_data.append( {
+                    'co': deepcopy(keyframe.co),
+                    'handle_left': deepcopy(keyframe.handle_left),
+                    'handle_right': deepcopy(keyframe.handle_right)
+                } ) # needs to be all three data points!
+        if last_co != None:
+            curve_datas.append([keyframes_referenced, first_co, last_co, keyframes_data, curve])
     return curve_datas
 
 class GRAPH_OT_flatten_keyframes(bpy.types.Operator):
     """Converges keys and handles to a linear fit between the first and last keyframe of the selection"""
     bl_idname = "graph.flatten_keyframes"
     bl_label = "Flatten Keyframes"
+    bl_options = {'REGISTER', 'UNDO'}
     add_to_menu = True
 
     def execute(self, context):
@@ -124,6 +201,7 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
     """Puts keys and handles along an eased curve between the first and last keyframe of the selection"""
     bl_idname = "graph.ease_keyframes"
     bl_label = "Ease Keyframes"
+    bl_options = {'REGISTER', 'UNDO'}
     add_to_menu = True
 
     offset = FloatVectorProperty( name="Offset", size=3 )
@@ -135,10 +213,8 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
             for i, keyframe in enumerate(curve_data[0]):
                 keyframe.co[1] = slopeMaker.ease(keyframe.co[0], factor, curve_data[3][i]['co'][1])
                 keyframe.handle_left[0] = keyframe.co[0] - 2
-                keyframe.handle_left_type = 'FREE'
                 keyframe.handle_left[1] = slopeMaker.ease(keyframe.handle_left[0], factor, curve_data[3][i]['handle_left'][1])
                 keyframe.handle_right[0] = keyframe.co[0] + 2
-                keyframe.handle_right_type = 'FREE'
                 keyframe.handle_right[1] = slopeMaker.ease(keyframe.handle_right[0], factor, curve_data[3][i]['handle_right'][1])
 
     def modal(self, context, event):
@@ -148,6 +224,10 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
             context.area.header_text_set("Ease Factor %.4f" % (self.offset[0]))
 
         elif event.type == 'LEFTMOUSE':
+            for curve_data in self._curve_datas:
+                for i, keyframe in enumerate(curve_data[0]):
+                    keyframe.handle_left_type = 'FREE'
+                    keyframe.handle_right_type = 'FREE'
             context.area.header_text_set()
             return {'FINISHED'}
 
@@ -156,7 +236,8 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
                 for i, keyframe in enumerate(curve_data[0]):
                     keyframe.co[1] = curve_data[3][i]['co'][1]
                     keyframe.handle_left[1] = curve_data[3][i]['handle_left'][1]
-                    keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]                
+                    keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]
+                curve_data[4].update()
             context.area.header_text_set()
             return {'CANCELLED'}
 
@@ -177,6 +258,7 @@ class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
     """Scales keys and handles to/from a linear fit between the first and last keyframe of the selection"""
     bl_idname = "graph.flatten_exaggerate_keyframes"
     bl_label = "Flatten/Exaggerate Keyframes"
+    bl_options = {'REGISTER', 'UNDO'}
     add_to_menu = True
 
     offset = FloatVectorProperty( name="Offset", size=3 )
@@ -208,7 +290,8 @@ class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
                 for i, keyframe in enumerate(curve_data[0]):
                     keyframe.co[1] = curve_data[3][i]['co'][1]
                     keyframe.handle_left[1] = curve_data[3][i]['handle_left'][1]
-                    keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]                
+                    keyframe.handle_right[1] = curve_data[3][i]['handle_right'][1]
+                curve_data[4].update()
             context.area.header_text_set()
             return {'CANCELLED'}
 
@@ -229,6 +312,7 @@ class keyframetools_ShareKeys(bpy.types.Operator):
     """Shares keys between visisble animation channels in dope sheet"""
     bl_idname = "action.share_keyframes"
     bl_label = "Share Keyframes"
+    bl_options = {'REGISTER', 'UNDO'}
     add_to_menu = True
 
     def execute(self, context):
@@ -259,6 +343,8 @@ class GRAPH_OT_place_cursor_and_pivot(bpy.types.Operator):
     """Places 2D cursor at selection and sets pivot mode to 2D cursor"""
     bl_idname = "graph.place_cursor_and_pivot"
     bl_label = "Place Cursor and Pivot"
+    bl_options = {'REGISTER', 'UNDO_GROUPED'}
+    # bl_undo_group = ""
     add_to_menu = True
 
     def execute(self, context):
@@ -285,7 +371,7 @@ def keyframetools_dopesheet_extra_controls(self, context):
 #             for c in classes:
 #                 if c.add_to_menu:
 #                     layout.operator(c.bl_idname)
-#         # else nothing            
+#         # else nothing
 
 class GRAPH_PIE_keyframetools_piemenu(bpy.types.Menu):
     # label is displayed at the center of the pie menu.
@@ -311,7 +397,7 @@ classes = (
     GRAPH_OT_place_cursor_and_pivot,
     # GRAPH_MT_keyframetools_menu,
     GRAPH_PIE_keyframetools_piemenu
-)
+    )
 
 def register():
     for c in classes:
@@ -319,8 +405,14 @@ def register():
     # bpy.types.DOPESHEET_HT_header.append(keyframetools_dopesheet_extra_controls)
     wm = bpy.context.window_manager
     km = wm.keyconfigs.addon.keymaps.new(name='Graph Editor', space_type='GRAPH_EDITOR')
-    kmi = km.keymap_items.new('wm.call_menu_pie', 'Z', 'PRESS', shift=True)
-    kmi.properties.name = 'GRAPH_PIE_keyframetools_piemenu'
+    # kmi = km.keymap_items.new('wm.call_menu_pie', 'Z', 'PRESS', shift=True)
+    # kmi.properties.name = 'GRAPH_PIE_keyframetools_piemenu'
+    # addon_keymaps.append((km, kmi))
+    kmi = km.keymap_items.new('graph.flatten_keyframes', 'A', 'PRESS', ctrl=True)
+    addon_keymaps.append((km, kmi))
+    kmi = km.keymap_items.new('graph.flatten_exaggerate_keyframes', 'D', 'PRESS')
+    addon_keymaps.append((km, kmi))
+    kmi = km.keymap_items.new('graph.ease_keyframes', 'A', 'PRESS', shift=True)
     addon_keymaps.append((km, kmi))
 
 def unregister():

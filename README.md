@@ -12,25 +12,9 @@ This software is in its very very very very early stages. It is offered here bec
 
 ## Functions
 
-### Pie menu
+All current functions are for the Graph Editor only.
 
-The pie menu (formerly bound to Shift+Z) needs to be set up manually in the keymap for now. (This will be easier in the future.)
-
-To set up the hotkey:
-
-* Go to File -> User Preferences -> Input, scroll down to "Graph Editor", then "Graph Editor (Global)"
-* Scroll down to where it says "Add new", then click it and fill in the following information.
-
-* Operator name: wm.call\_menu\_pie
-* Name field (greyed out, click it anyway): GRAPH\_PIE\_keyframetools\_piemenu
-
-Please refer to the pie menu setup image included in the codebase for how it should look. And don't forget to save your user preferences afterwards!
-
-You can also access the functions from the Space Bar. (2.8 is not supported yet.)
-
-### Graph Editor
-
-#### Keyframe manipulating tools
+### Keyframe manipulating tools
 
 All of these should work with multiple bone channels and object-level animation. Material values and scene-level 
 
@@ -38,13 +22,30 @@ All of these should work with multiple bone channels and object-level animation.
 * **Flatten/Exaggerate Keyframes** (hotkey D): Interactively flattens or exaggerates selected keyframes along a straight line between the first and last keyframe of the selection. Useful for making a motion smaller or bigger. Also works on multiple channels. 
 * **Ease Keyframes** (hotkey Shift+A): Interactively create an ease in or ease out for a selection of keyframes. Useful for tidying up an ease pattern. Also works on multiple channels. 
 
-#### Shortcut tool
+### Shortcut tool
 
 * **Place Cursor and Pivot** (hotkey Ctrl+Shift+G): Places the 2D Cursor at the selection and changes Pivot Center to 2D Cursor. Like Ctrl+G but better.
 
+### Pie menu
+
+The pie menu is bound to Shift+Z. This gives you Ease Keys, Flatten Keys, Flatten/Exaggerate Keys and Place Cursor and Pivot.
+
+### Changing hotkeys
+
+If you don't like the hotkeys, you can always change them in the keymap!
+
+* Go to File -> User Preferences -> Input
+* Change the Search mode to Key Binding, then type in the hotkey Z.
+* Scroll down to "Graph Editor" and look for the hotkey in question by function. (Note: The pie menu is disguised as "Call Pie Menu", see the pie menu setup graphic for how it should look)
+* To change the hotkey, hit the > to the left and change the key to whatever you like. To get rid of the shortcut, click the big X.
+
+Don't forget to save your user preferences afterwards! (Hint: click **Save User Settings** at the bottom left.)
+
+You can also access the functions from the Space Bar. (2.8 is not supported yet.)
+
 ## Roadmap
 
-These are the current priorities as of version 0.5.0 (27 October 2018)
+These are the current priorities as of version 0.5.1 (28 October 2018)
 
 ### Coming Keyframe-Related Additions
 
@@ -53,9 +54,9 @@ These are the current priorities as of version 0.5.0 (27 October 2018)
 
 ### Coming Other Changes and Fixes
 
-* UI: Make the pie menu hotkey settable from user preferences.
 * All: Make all F-Curve types manipulable, including properties belonging to materials, scenes and worlds.
 * Ease: Do something more helpful with out-of-bounds keys 
+* Share Keys: Make it work again
 
 Work on Blender 2.8 compatibility will begin after 2.8 API is declared stable by the Blender devs, maybe November? 
 
@@ -64,5 +65,5 @@ Work on Blender 2.8 compatibility will begin after 2.8 API is declared stable by
 Thanks to
 
 * Luciano "Looch" Muñoz for guidance and encouragment
-* Irmitya for making object-level animation work and choosing some hotkeys! :)
+* Irmitya for contributing object-level animation and finally choosing some hotkeys! :)
 * Alan Camilo for inspiring us with animBot

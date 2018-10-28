@@ -19,7 +19,7 @@
 bl_info = {
     "name": "Keyframe Tools",
     "author": "quollism",
-    "version": (0, 5, 0),
+    "version": (0, 5, 1),
     "blender": (2, 79, 0),
     "description": "Some helpful tools for working with keyframes. Inspired by Alan Camilo's animBot toolset.",
     "warning": "Pre-release software. Only armature animation is supported so far. Working on it!",
@@ -383,7 +383,7 @@ class GRAPH_PIE_keyframetools_piemenu(bpy.types.Menu):
         if context.space_data.type == 'GRAPH_EDITOR':
             layout = self.layout
             pie = layout.menu_pie()
-            pie.operator("graph.place_cursor_and_pivot", icon='CURSOR', text="Set Cursor and Pivot")
+            pie.operator("graph.place_cursor_and_pivot", icon='CURSOR', text="Place Cursor and Pivot")
             pie.operator("graph.flatten_keyframes", icon='MAN_SCALE', text="Flatten Keys")
             pie.operator("graph.flatten_exaggerate_keyframes", icon='MAN_SCALE', text="Flatten/Exaggerate Keys")
             pie.operator("graph.ease_keyframes", icon='MAN_SCALE', text="Ease Keys")
@@ -405,9 +405,11 @@ def register():
     # bpy.types.DOPESHEET_HT_header.append(keyframetools_dopesheet_extra_controls)
     wm = bpy.context.window_manager
     km = wm.keyconfigs.addon.keymaps.new(name='Graph Editor', space_type='GRAPH_EDITOR')
-    # kmi = km.keymap_items.new('wm.call_menu_pie', 'Z', 'PRESS', shift=True)
-    # kmi.properties.name = 'GRAPH_PIE_keyframetools_piemenu'
-    # addon_keymaps.append((km, kmi))
+    # pie menu!
+    kmi = km.keymap_items.new('wm.call_menu_pie', 'Z', 'PRESS', shift=True)
+    kmi.properties.name = 'GRAPH_PIE_keyframetools_piemenu'
+    addon_keymaps.append((km, kmi))
+    # shortcuts for graph editor
     kmi = km.keymap_items.new('graph.flatten_keyframes', 'A', 'PRESS', ctrl=True)
     addon_keymaps.append((km, kmi))
     kmi = km.keymap_items.new('graph.flatten_exaggerate_keyframes', 'D', 'PRESS')

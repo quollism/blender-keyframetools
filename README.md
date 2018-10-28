@@ -34,9 +34,9 @@ You can also access the functions from the Space Bar. (2.8 is not supported yet.
 
 All of these should work with multiple bone channels and object-level animation. Material values and scene-level 
 
-* **Flatten Keyframes** (hotkey Ctrl+A): Non-interactively flattens selected keyframes to a straight line between the first and last keyframe of the selection. Useful for tidying up. Works on multiple channels. Shortcut: Shift+A
+* **Flatten Keyframes** (hotkey Ctrl+A): Non-interactively flattens selected keyframes to a straight line between the first and last keyframe of the selection. Useful for tidying up. Works on multiple channels.
 * **Flatten/Exaggerate Keyframes** (hotkey D): Interactively flattens or exaggerates selected keyframes along a straight line between the first and last keyframe of the selection. Useful for making a motion smaller or bigger. Also works on multiple channels. 
-* **Ease Keyframes** (hotkey Shift+A): Interactively create an ease in or ease out for a selection of keyframes. Useful for tidying up an ease pattern. Also works on multiple channels. 
+* **Ease Keyframes** (hotkey Shift+A): Interactively create an ease in or ease out for a selection of keyframes. Useful for tidying up an ease pattern. Also works on multiple channels.
 
 #### Shortcut tool
 

@@ -6,7 +6,7 @@ Some handy tools for working with keyframes in Blender. Inspired by Alan Camilo'
 
 This software is in its very very very very early stages. It is offered here because people on Twitter were all like "wow this looks awesome i want to try it". And it's even a little bit useful!
 
-**Note**: This tool doesn't work for all types of F-Curves yet. Bones and object-level animation are good to go as of 0.5.0 but properties in materials, the scene and the world don't respond to these tools yet because they're in a different part of the API. (Hopefully this weird state of affairs gets fixed in Blender 2.8's Python API.)
+**Note**: This tool doesn't work for all types of F-Curves yet. Bones and object-level animation are good to go as of 0.5.1 but shape keys as well as properties in materials, the scene and the world don't respond to these tools yet. It's an API thing. (Hopefully this weird state of affairs gets fixed in Blender 2.8's Python API.)
 
 **Only in development for 2.79b, does not work in 2.8 yet. 2.8 is wonderful though, isn't it?**
 
@@ -18,7 +18,7 @@ All current functions are for the Graph Editor only.
 
 All of these should work with multiple bone channels and object-level animation. Material values and scene-level 
 
-* **Flatten Keyframes** (hotkey Ctrl+A): Non-interactively flattens selected keyframes to a straight line between the first and last keyframe of the selection. Useful for tidying up. Works on multiple channels. Shortcut: Shift+A
+* **Flatten Keyframes** (hotkey Ctrl+A): Non-interactively flattens selected keyframes to a straight line between the first and last keyframe of the selection. Useful for tidying up. Works on multiple channels.
 * **Flatten/Exaggerate Keyframes** (hotkey D): Interactively flattens or exaggerates selected keyframes along a straight line between the first and last keyframe of the selection. Useful for making a motion smaller or bigger. Also works on multiple channels. 
 * **Ease Keyframes** (hotkey Shift+A): Interactively create an ease in or ease out for a selection of keyframes. Useful for tidying up an ease pattern. Also works on multiple channels. 
 

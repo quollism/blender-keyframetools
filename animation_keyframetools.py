@@ -35,8 +35,9 @@ addon_keymaps = []
 
 def get_selected_keys_and_extents():
     context = bpy.context
-    pbones = []
-    pbones.append(context.selected_pose_bones)
+    pbones = context.selected_pose_bones
+    if pbones is None:
+        pbones = []
     curve_datas = []
     selected = []
     objects = []

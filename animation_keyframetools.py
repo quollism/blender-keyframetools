@@ -19,7 +19,7 @@
 bl_info = {
     "name": "Keyframe Tools",
     "author": "quollism",
-    "version": (0, 5, 1),
+    "version": (0, 5, 2),
     "blender": (2, 79, 0),
     "description": "Some helpful tools for working with keyframes. Inspired by Alan Camilo's animBot toolset.",
     "warning": "Pre-release software. Only armature animation is supported so far. Working on it!",
@@ -29,7 +29,7 @@ bl_info = {
 import bpy
 from copy import deepcopy
 from mathutils import Vector
-from bpy.props import FloatVectorProperty
+from bpy.props import FloatProperty, FloatVectorProperty
 
 addon_keymaps = []
 
@@ -144,7 +144,7 @@ class GRAPH_OT_flatten_keyframes(bpy.types.Operator):
     """Converges keys and handles to a linear fit between the first and last keyframe of the selection"""
     bl_idname = "graph.flatten_keyframes"
     bl_label = "Flatten Keyframes"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'UNDO'}
     add_to_menu = True
 
     def execute(self, context):
@@ -202,10 +202,10 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
     """Puts keys and handles along an eased curve between the first and last keyframe of the selection"""
     bl_idname = "graph.ease_keyframes"
     bl_label = "Ease Keyframes"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'UNDO'}
     add_to_menu = True
 
-    offset = FloatVectorProperty( name="Offset", size=3 )
+    offset = FloatProperty( name="Offset" )  # FloatVectorProperty( name="Offset", size=3 )
 
     def execute(self, context):
         factor = self.offset[0]
@@ -220,11 +220,13 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
 
     def modal(self, context, event):
         if event.type == 'MOUSEMOVE':
-            self.offset = (self._initial_mouse - Vector((event.mouse_x, event.mouse_y, 0.0))) * -0.02
+            context.space_data.use_auto_normalization = False
+            self.offset = (self._initial_mouse - event.mouse_x) * -0.02  # (self._initial_mouse - Vector((event.mouse_x, event.mouse_y, 0.0))) * -0.02
             self.execute(context)
-            context.area.header_text_set("Ease Factor %.4f" % (self.offset[0]))
+            context.area.header_text_set("Ease Factor %.4f" % (self.offset))  # ("Ease Factor %.4f" % (self.offset[0]))
 
         elif event.type == 'LEFTMOUSE':
+            context.space_data.use_auto_normalization = self._auto_normalize
             for curve_data in self._curve_datas:
                 for i, keyframe in enumerate(curve_data[0]):
                     keyframe.handle_left_type = 'FREE'
@@ -233,6 +235,7 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
             return {'FINISHED'}
 
         elif event.type in {'RIGHTMOUSE', 'ESC'}:
+            context.space_data.use_auto_normalization = self._auto_normalize
             for curve_data in self._curve_datas:
                 for i, keyframe in enumerate(curve_data[0]):
                     keyframe.co[1] = curve_data[3][i]['co'][1]
@@ -247,7 +250,8 @@ class GRAPH_OT_ease_keyframes(bpy.types.Operator):
     def invoke(self, context, event):
         print(context)
         if context.space_data.type == 'GRAPH_EDITOR':
-            self._initial_mouse = Vector((event.mouse_x, event.mouse_y, 0.0)) 
+            self._auto_normalize = context.space_data.use_auto_normalization
+            self._initial_mouse = event.mouse_x  # self._initial_mouse = Vector((event.mouse_x, event.mouse_y, 0.0)) 
             self._curve_datas = get_selected_keys_and_extents()
             context.window_manager.modal_handler_add(self)
             return {'RUNNING_MODAL'}
@@ -259,15 +263,15 @@ class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
     """Scales keys and handles to/from a linear fit between the first and last keyframe of the selection"""
     bl_idname = "graph.flatten_exaggerate_keyframes"
     bl_label = "Flatten/Exaggerate Keyframes"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'UNDO'}
     add_to_menu = True
 
-    offset = FloatVectorProperty( name="Offset", size=3 )
+    offset = FloatProperty( name="Offset" )  # FloatVectorProperty( name="Offset", size=3 )
 
     def execute(self, context):
         for curve_data in self._curve_datas:
             slopeMaker = keyframe_calculator(curve_data[1], curve_data[2])
-            shifted_offset = self.offset[0] + 1
+            shifted_offset = self.offset + 1  # self.offset[0] + 1
             for i, keyframe in enumerate(curve_data[0]):
                 keyframe.co[1] = slopeMaker.flatten_exaggerate(
                     keyframe.co[0], curve_data[3][i]['co'][1], shifted_offset)
@@ -278,15 +282,18 @@ class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
 
     def modal(self, context, event):
         if event.type == 'MOUSEMOVE':
-            self.offset = (self._initial_mouse - Vector((event.mouse_x, event.mouse_y, 0.0))) * -0.01
+            context.space_data.use_auto_normalization = False
+            self.offset = (self._initial_mouse - event.mouse_x) * -0.01  # (self._initial_mouse - Vector((event.mouse_x, event.mouse_y, 0.0))) * -0.01
             self.execute(context)
-            context.area.header_text_set("Flatten/Exaggerate Factor %.4f" % (self.offset[0] + 1))
+            context.area.header_text_set("Flatten/Exaggerate Factor %.4f" % (self.offset + 1))  # ("Flatten/Exaggerate Factor %.4f" % (self.offset[0] + 1))
 
         elif event.type == 'LEFTMOUSE':
+            context.space_data.use_auto_normalization = self._auto_normalize
             context.area.header_text_set()
             return {'FINISHED'}
 
         elif event.type in {'RIGHTMOUSE', 'ESC'}:
+            context.space_data.use_auto_normalization = self._auto_normalize
             for curve_data in self._curve_datas:
                 for i, keyframe in enumerate(curve_data[0]):
                     keyframe.co[1] = curve_data[3][i]['co'][1]
@@ -300,7 +307,8 @@ class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
 
     def invoke(self, context, event):
         if context.space_data.type == 'GRAPH_EDITOR':
-            self._initial_mouse = Vector((event.mouse_x, event.mouse_y, 0.0)) 
+            self._auto_normalize = context.space_data.use_auto_normalization
+            self._initial_mouse = event.mouse_x  # Vector((event.mouse_x, event.mouse_y, 0.0))
             self._curve_datas = get_selected_keys_and_extents()
             context.window_manager.modal_handler_add(self)
             return {'RUNNING_MODAL'}
@@ -313,7 +321,7 @@ class keyframetools_ShareKeys(bpy.types.Operator):
     """Shares keys between visisble animation channels in dope sheet"""
     bl_idname = "action.share_keyframes"
     bl_label = "Share Keyframes"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {'UNDO'}
     add_to_menu = True
 
     def execute(self, context):

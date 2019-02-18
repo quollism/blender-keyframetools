@@ -19,7 +19,7 @@
 bl_info = {
     "name": "Keyframe Tools",
     "author": "quollism",
-    "version": (0, 5, 2),
+    "version": (0, 5, 3),
     "blender": (2, 79, 0),
     "description": "Some helpful tools for working with keyframes. Inspired by Alan Camilo's animBot toolset.",
     "warning": "Pre-release software. Only armature animation is supported so far. Working on it!",
@@ -263,7 +263,7 @@ class GRAPH_OT_flatten_exaggerate_keyframes(bpy.types.Operator):
     """Scales keys and handles to/from a linear fit between the first and last keyframe of the selection"""
     bl_idname = "graph.flatten_exaggerate_keyframes"
     bl_label = "Flatten/Exaggerate Keyframes"
-    bl_options = {'UNDO'}
+    bl_options = {'UNDO', 'GRAB_CURSOR', 'BLOCKING'}
     add_to_menu = True
 
     offset = FloatProperty( name="Offset" )  # FloatVectorProperty( name="Offset", size=3 )

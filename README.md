@@ -1,14 +1,17 @@
 # blender-keyframetools
 
-Some handy tools for working with keyframes in Blender. Inspired by Alan Camilo's animBot.
+Handy tools for working with keyframes in Blender. Inspired by Alan Camilo's animBot.
+
+**Blender 2.8 breaks compatibility so it has its own branch.**
 
 ## Limitations
 
-This software is in its very very very very early stages. It is offered here because people on Twitter were all like "wow this looks awesome i want to try it". And it's even a little bit useful!
+This add-on is in its very early stages of development. It is offered here because people on Twitter were all "wow this looks awesome i want to try it".
 
-**Note**: This tool doesn't work for all types of F-Curves yet. Bones and object-level animation are good to go as of 0.5.1 but shape keys as well as properties in materials, the scene and the world don't respond to these tools yet. It's an API thing. (Hopefully this weird state of affairs gets fixed in Blender 2.8's Python API.)
+**Note**: This tool doesn't work for all types of F-Curves yet!
 
-**Only in development for 2.79b, does not work in 2.8 yet. 2.8 is wonderful though, isn't it?**
+* Good to go: Bones, object properties and object-level animation.
+* Not working yet: Shape keys, properties of materials, the scene and the world aren't editable yet. The add-on doesn't know they don't work yet though which is strangely cute of it. :)
 
 ## Functions
 
@@ -41,24 +44,25 @@ If you don't like the hotkeys, you can always change them in the keymap!
 
 Don't forget to save your user preferences afterwards! (Hint: click **Save User Settings** at the bottom left.)
 
-You can also access the functions from the Space Bar. (2.8 is not supported yet.)
+You can also access the functions from the Function Search menu. (Space Bar on legacy keymap.)
 
 ## Roadmap
 
-These are the current priorities as of version 0.5.1 (28 October 2018)
-
-### Coming Keyframe-Related Additions
-
-* Smooth Rough tool from animBot (will be called Dampen/Excite)
-* More stuff depending on what Looch thinks is useful :)
+These are the current priorities as of version 0.6.0 (24 May 2019)
 
 ### Coming Other Changes and Fixes
 
+* Blender 2.8 compatibility is underway!
 * All: Make all F-Curve types manipulable, including properties belonging to materials, scenes and worlds.
 * Ease: Do something more helpful with out-of-bounds keys 
 * Share Keys: Make it work again
 
-Work on Blender 2.8 compatibility will begin after 2.8 API is declared stable by the Blender devs, maybe November? 
+### Coming Keyframe-Related Additions
+
+* Smooth Rough tool from animBot (probably will be called Dampen/Excite)
+* More stuff depending on what Looch thinks is useful :)
+
+Please do not ask for timelines. :)
 
 ## Acknowledgements
 

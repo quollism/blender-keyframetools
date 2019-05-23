@@ -19,7 +19,7 @@
 bl_info = {
     "name": "Keyframe Tools",
     "author": "quollism",
-    "version": (0, 5, 3),
+    "version": (0, 6, 0),
     "blender": (2, 80, 0),
     "description": "Some helpful tools for working with keyframes. Inspired by Alan Camilo's animBot toolset.",
     "warning": "Pre-release software. Only armature animation is supported so far. Working on it!",
@@ -43,6 +43,8 @@ def get_selected_keys_and_extents():
     objects = []
     bones = []
     fcurves = []
+
+    # bpy.data.shape_keys['Key'].key_blocks["Key 1"].value
 
     try:
         only_selected = context.space_data.dopesheet.show_only_selected

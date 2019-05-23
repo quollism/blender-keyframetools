@@ -402,6 +402,9 @@ class GRAPH_PIE_keyframetools_piemenu(bpy.types.Menu):
     # label is displayed at the center of the pie menu.
     bl_label = "Keyframe Tools"
     bl_idname = "GRAPH_PIE_keyframetools_piemenu"
+    bl_space_type = 'GRAPH_EDITOR'
+    bl_region_type = 'NONE'
+    bl_context = 'EDIT_CURVE'
     add_to_menu = False
 
     def draw(self, context):
@@ -409,9 +412,9 @@ class GRAPH_PIE_keyframetools_piemenu(bpy.types.Menu):
             layout = self.layout
             pie = layout.menu_pie()
             pie.operator("graph.place_cursor_and_pivot", icon='CURSOR', text="Place Cursor and Pivot")
-            pie.operator("graph.flatten_keyframes", icon='MAN_SCALE', text="Flatten Keys")
-            pie.operator("graph.flatten_exaggerate_keyframes", icon='MAN_SCALE', text="Flatten/Exaggerate Keys")
-            pie.operator("graph.ease_keyframes", icon='MAN_SCALE', text="Ease Keys")
+            pie.operator("graph.flatten_keyframes", icon='ARROW_LEFTRIGHT', text="Flatten Keys")
+            pie.operator("graph.flatten_exaggerate_keyframes", icon='ARROW_LEFTRIGHT', text="Flatten/Exaggerate Keys")
+            pie.operator("graph.ease_keyframes", icon='ARROW_LEFTRIGHT', text="Ease Keys")
 
 classes = (
     # below operator is buggy mcbugbugs

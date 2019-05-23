@@ -84,7 +84,7 @@ def get_selected_keys_and_extents():
             add_obj(obj)
         if obj.pose is not None:
             for (name, pbone) in obj.pose.bones.items():
-                if any((only_selected is False, obj.select, pbone in pbones,)):
+                if any((only_selected is False, obj.select_get(), pbone in pbones,)):
                     add_bone(pbone)
 
     # Add fcurves from objects

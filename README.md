@@ -2,8 +2,6 @@
 
 Handy tools for working with keyframes in Blender. Inspired by Alan Camilo's animBot.
 
-**Blender 2.8 breaks compatibility so it has its own branch.**
-
 ## Limitations
 
 This add-on is in its very early stages of development. It is offered here because people on Twitter were all "wow this looks awesome i want to try it".
@@ -48,11 +46,10 @@ You can also access the functions from the Function Search menu. (Space Bar on l
 
 ## Roadmap
 
-These are the current priorities as of version 0.6.0 (24 May 2019)
+These are the current priorities as of version 0.6.1 (27 June 2019)
 
 ### Coming Other Changes and Fixes
 
-* Blender 2.8 compatibility is underway!
 * All: Make all F-Curve types manipulable, including properties belonging to materials, scenes and worlds.
 * Ease: Do something more helpful with out-of-bounds keys 
 * Share Keys: Make it work again
